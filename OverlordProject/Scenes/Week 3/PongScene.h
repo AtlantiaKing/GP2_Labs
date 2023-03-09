@@ -16,15 +16,18 @@ public:
 
 protected:
 	void Initialize() override;
+	void PostInitialize() override;
 	void Update() override;
 	void Draw() override;
 	void OnGUI() override;
 
 private:
+	bool m_MustReset{};
+
 	CubePrefab* m_pRightPeddle{};
 	CubePrefab* m_pLeftPeddle{};
 	SpherePrefab* m_pBall{};
 
-	XMFLOAT3 m_BallDirection{};
+	void Reset();
 };
 
