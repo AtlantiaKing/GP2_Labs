@@ -44,20 +44,31 @@ SpriteRenderer::~SpriteRenderer()
 	m_Textures.clear();
 }
 
-void SpriteRenderer::UpdateBuffer(const SceneContext& /*sceneContext*/)
+void SpriteRenderer::UpdateBuffer(const SceneContext& sceneContext)
 {
 	TODO_W4(L"Complete UpdateBuffer")
 
 	if (!m_pVertexBuffer || m_Sprites.size() > m_BufferSize)
 	{
-		// if the vertex buffer does not exists, or the number of sprites is bigger then the buffer size
-		//		release the buffer
-		//		update the buffer size (if needed)
-		//		Create a new buffer. Make sure the Usage flag is set to Dynamic, bound as vertex buffer
-		//		and set the cpu access flags to access_write
-		//
-		//		Finally create the buffer (sceneContext.d3dContext.pDevice). Be sure to log the HResult! (HANDLE_ERROR)
+		if(m_pVertexBuffer) m_pVertexBuffer->Release();
 
+		if (m_Sprites.size() != m_BufferSize) m_BufferSize = static_cast<UINT>(m_Sprites.size());
+
+		D3D11_BUFFER_DESC bd{};
+		bd.Usage = D3D11_USAGE_DYNAMIC;
+		bd.ByteWidth = sizeof(VertexSprite) * static_cast<uint32_t>(m_Sprites.size());
+		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		bd.MiscFlags = 0;
+
+		D3D11_SUBRESOURCE_DATA initData{};
+		initData.pSysMem = m_Sprites.data();
+
+		HRESULT result{ sceneContext.d3dContext.pDevice->CreateBuffer(&bd, &initData, &m_pVertexBuffer) };
+		if (FAILED(result))
+		{
+			Logger::LogError(L"Couldn't create a vertex buffer for the SpriteRenderer");
+		}
 
 		ASSERT_NULL_(m_pVertexBuffer);
 	}
@@ -171,7 +182,7 @@ void SpriteRenderer::AppendSprite(TextureData* pTexture, const XMFLOAT2& positio
 	m_Sprites.push_back(vertex);
 }
 
-void SpriteRenderer::DrawImmediate(const D3D11Context& d3dContext, ID3D11ShaderResourceView* pSrv, const XMFLOAT2& position, const XMFLOAT4& color, const XMFLOAT2& pivot, const XMFLOAT2& scale, float rotation)
+void SpriteRenderer::DrawImmediate(const D3D11Context& d3dContext, ID3D11ShaderResourceView* pSrv, const XMFLOAT2& position, const XMFLOAT4& color, const XMFLOAT2& pivot, const XMFLOAT2& scale, float rotation, float depth)
 {
 	//Create Immediate VB
 	if (!m_pImmediateVertexBuffer)
@@ -190,7 +201,7 @@ void SpriteRenderer::DrawImmediate(const D3D11Context& d3dContext, ID3D11ShaderR
 	//Map Vertex
 	VertexSprite vertex{};
 	vertex.TextureId = 0;
-	vertex.TransformData = XMFLOAT4(position.x, position.y, 0, rotation);
+	vertex.TransformData = XMFLOAT4(position.x, position.y, depth, rotation);
 	vertex.TransformData2 = XMFLOAT4(pivot.x, pivot.y, scale.x, scale.y);
 	vertex.Color = color;
 
