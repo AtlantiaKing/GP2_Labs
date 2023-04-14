@@ -6,14 +6,20 @@
 
 void PongScene::Initialize()
 {
+	// Set a random seed
 	srand(static_cast<unsigned int>(time(nullptr)));
 
+	// Remove the previous camera
 	auto prevCam{ m_SceneContext.pCamera };
+	RemoveChild(prevCam->GetGameObject());
+	delete prevCam->GetGameObject();
+
+	// Create a new camera and set it as the main camera
 	auto pCamera = new FixedCamera{};
 	AddChild(pCamera);
 	SetActiveCamera(pCamera->GetComponent<CameraComponent>());
-	RemoveChild(prevCam->GetGameObject());
 	pCamera->GetTransform()->Translate(0.0f, 0.0f, -50.0f);
+
 
 	auto& physX{ PxGetPhysics() };
 	auto pPhysMat{ physX.createMaterial(0.0f, 0.0f, 1.0f) };
