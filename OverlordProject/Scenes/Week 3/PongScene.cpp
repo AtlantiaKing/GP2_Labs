@@ -109,6 +109,7 @@ void PongScene::Initialize()
 
 void PongScene::PostInitialize()
 {
+	// Disable gravity on the ball and the peddles
 	m_pBall->GetComponent<RigidBodyComponent>()->GetPxRigidActor()->setActorFlags(PxActorFlag::eDISABLE_GRAVITY);
 	m_pLeftPeddle->GetComponent<RigidBodyComponent>()->GetPxRigidActor()->setActorFlags(PxActorFlag::eDISABLE_GRAVITY);
 	m_pRightPeddle->GetComponent<RigidBodyComponent>()->GetPxRigidActor()->setActorFlags(PxActorFlag::eDISABLE_GRAVITY);
@@ -119,6 +120,7 @@ void PongScene::Update()
 	constexpr float peddleMoveSpeed{ 20.0f };
 	constexpr float maxPos{ 17.0f };
 
+	// Move the right peddle
 	auto pRightTransform{ m_pRightPeddle->GetTransform() };
 	XMFLOAT3 rightPos{ pRightTransform->GetPosition() };
 	if (InputManager::IsKeyboardKey(InputState::down, VK_UP))
@@ -132,6 +134,7 @@ void PongScene::Update()
 		if (rightPos.y > -maxPos) pRightTransform->Translate(rightPos);
 	}
 
+	// Move the left peddle
 	auto pleftTransform{ m_pLeftPeddle->GetTransform() };
 	XMFLOAT3 leftPos{ pleftTransform->GetPosition() };
 	if (InputManager::IsKeyboardKey(InputState::down, 'W') || InputManager::IsKeyboardKey(InputState::down, 'Z'))
@@ -145,11 +148,14 @@ void PongScene::Update()
 		if (leftPos.y > -maxPos) pleftTransform->Translate(leftPos);
 	}
 
+	// Reset the ball
 	if (InputManager::IsKeyboardKey(InputState::pressed, 'R'))
 	{
 		Reset();
 	}
 
+	// Reset the ball direction if the Reset method has been called
+	//	Must be called here to avoid concurrency issues with PhysX
 	if (m_MustReset)
 	{
 		constexpr float ballSpeed{ 20.0f };
@@ -179,10 +185,13 @@ void PongScene::OnGUI()
 
 void PongScene::Reset()
 {
+	// Reset the ball position
 	m_pBall->GetTransform()->Translate(0.0f, 0.0f, 0.0f);
 
+	// Toggle the reset flag
 	m_MustReset = true;
 
+	// Reset peddle positions
 	const XMFLOAT3 peddlePosition{ 30.0f, 0.0f, 0.0f };
 	m_pRightPeddle->GetTransform()->Translate(XMVECTOR{ peddlePosition.x, peddlePosition.y, peddlePosition.z });
 	m_pLeftPeddle->GetTransform()->Translate(XMVECTOR{ -peddlePosition.x, peddlePosition.y, peddlePosition.z });

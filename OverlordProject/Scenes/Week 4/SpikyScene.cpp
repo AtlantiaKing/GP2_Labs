@@ -27,6 +27,7 @@ void SpikyScene::Update()
 {
 	constexpr float rotateSpeed{ 20.0f };
 
+	// Rotate the spiky ball
 	m_pTransform->Rotate(0.0f, m_SceneContext.pGameTime->GetTotal() * rotateSpeed, 0.0f);
 }
 

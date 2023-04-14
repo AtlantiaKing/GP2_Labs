@@ -7,18 +7,22 @@ void SpriteTestScene::Initialize()
 	m_SceneContext.settings.drawPhysXDebug = false;
 	m_SceneContext.settings.enableOnGUI = true;
 
+	// Create a gameobject and assign a sprite component
 	m_pSprite = new GameObject();
 	m_pSprite->AddComponent(new SpriteComponent(L"Textures/TestSprite.jpg", { 0.5f,0.5f }, { 1.f,1.f,1.f,.5f }));
 	AddChild(m_pSprite);
 
+	// Move the sprite to the middle of the screen
 	m_pSprite->GetTransform()->Translate(m_SceneContext.windowWidth / 2.f, m_SceneContext.windowHeight / 2.f, .9f);
 	m_pSprite->GetTransform()->Scale(1.f, 1.f, 1.f);
 }
 
 void SpriteTestScene::Update()
 {
+	// Give the sprite the correct rotation
 	m_pSprite->GetTransform()->Rotate(0.f, 0.f, m_TotalRotation);
 
+	// Rotate the sprite if auto rotation is enabled
 	if (m_AutoRotate)
 	{
 		m_TotalRotation += 30.f * m_SceneContext.pGameTime->GetElapsed();

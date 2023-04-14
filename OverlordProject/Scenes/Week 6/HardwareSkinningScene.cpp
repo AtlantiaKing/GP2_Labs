@@ -15,17 +15,22 @@ HardwareSkinningScene::~HardwareSkinningScene()
 
 void HardwareSkinningScene::Initialize()
 {
+	// Enable ImGUI
 	m_SceneContext.settings.enableOnGUI = true;
 
+	// Create a material for the skinned mesh
 	const auto pSkinnedMaterial = MaterialManager::Get()->CreateMaterial<DiffuseMaterial_Skinned>();
 	pSkinnedMaterial->SetDiffuseTexture(L"Textures/PeasantGirl_Diffuse.png");
 
+	// Create a gameobject and assign a model component
 	const auto pObject = AddChild(new GameObject);
 	const auto pModel = pObject->AddComponent(new ModelComponent(L"Meshes/PeasantGirl.ovm"));
 	pModel->SetMaterial(pSkinnedMaterial);
 
+	// Scale the game object
 	pObject->GetTransform()->Scale(0.15f);
 
+	// Initialize the animator
 	pAnimator = pModel->GetAnimator();
 	pAnimator->SetAnimation(m_AnimationClipId);
 	pAnimator->SetAnimationSpeed(m_AnimationSpeed);
